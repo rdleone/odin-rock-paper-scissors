@@ -1,5 +1,68 @@
 const validInput = ["rock", "paper", "scissors"];
-game();
+const POINTS_TO_WIN = 5;
+
+const gameText = document.querySelector('.game-text');
+const rockBtn = document.querySelector('#rock');
+const paperBtn = document.querySelector('#paper');
+const scissorsBtn = document.querySelector('#scissors');
+const btnContainer = document.querySelector('.btn-container');
+
+let playerScore = 0;
+let opponentScore = 0;
+
+btnContainer.addEventListener('click', (event) => {
+    const compChoice = getComputerChoice();
+    const target = event.target;
+    let result;
+
+    switch(target.id) {
+        case 'rock':
+            console.log('You chose rock');
+            result = evaluateRound('rock', compChoice)
+        break;
+        case 'paper':
+            console.log('You chose paper');
+            result = evaluateRound('paper', compChoice)
+        break;
+        case 'scissors':
+            console.log('You chose scissors');
+            result = evaluateRound('scissors', compChoice)
+        break;
+    }
+
+    // Update score
+    switch(result) {
+        case 1:
+            playerScore++;
+        break;
+        case -1:
+            opponentScore++;
+        break;
+        case 0:
+            // do nothing
+        break;
+        default:
+
+        break;
+    }
+
+    const roundData = {
+        playerChoice: target.innerText.toLowerCase(),
+        opponentChoice: compChoice,
+        result: result
+    };
+
+    updateGameText(gameText, roundData, playerScore, opponentScore);
+
+    // Game over, reset
+    if(playerScore == POINTS_TO_WIN || opponentScore == POINTS_TO_WIN) {
+        playerScore = 0;
+        opponentScore = 0;
+    }
+
+});
+
+// game();
 
 /**
  * Plays 5 rounds of Rock, Paper, Scissors. For each round, the player enters their
@@ -122,4 +185,47 @@ function getComputerChoice() {
     if(num === 0) return "rock";
     else if (num === 1) return "paper";
     else return "scissors";
+}
+
+function updateGameText(gameText, roundData, playerScore, opponentScore) {
+    removeAllChildNodes(gameText);
+
+    let mainText = document.createElement('h1');
+    let subText = document.createElement('h2');
+    gameText.appendChild(mainText);
+    gameText.appendChild(subText);
+
+    if(playerScore == POINTS_TO_WIN) {
+        mainText.textContent = 'YOU WIN !!!';
+        subText.textContent = `Final Score: Player ${playerScore} , Opponent ${opponentScore}`;
+    } else if(opponentScore == POINTS_TO_WIN) {
+        mainText.textContent = 'You lose...';
+        subText.textContent = `Final Score: Player ${playerScore} , Opponent ${opponentScore}`;
+    } else {
+        switch(roundData.result) {
+            case 1:
+                mainText.textContent = `Round won; ${roundData.playerChoice} beats ${roundData.opponentChoice}`;
+            break;
+            case -1:
+                mainText.textContent = `Round lost; ${roundData.opponentChoice} beats ${roundData.playerChoice}`;
+            break;
+            case 0:
+                mainText.textContent = `It's a tie! Try again.`;
+            break;
+            default:
+                mainText.textContent = 'ERROR';
+            break;
+        }
+        subText.textContent =  `Current Score: Player ${playerScore} , Opponent ${opponentScore}`;
+    }
+}
+
+/**
+ * Helper function used to clear game text
+ * @param {Node} parent
+ */
+function removeAllChildNodes(parent) {
+    while(parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
 }
