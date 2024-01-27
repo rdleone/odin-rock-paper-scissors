@@ -1,34 +1,31 @@
-const validInput = ["rock", "paper", "scissors"];
 const POINTS_TO_WIN = 5;
 
 const gameText = document.querySelector('.game-text');
-const rockBtn = document.querySelector('#rock');
-const paperBtn = document.querySelector('#paper');
-const scissorsBtn = document.querySelector('#scissors');
 const btnContainer = document.querySelector('.btn-container');
+const buttons = document.querySelectorAll('button');
+
 
 let playerScore = 0;
 let opponentScore = 0;
 
 btnContainer.addEventListener('click', (event) => {
-    const compChoice = getComputerChoice();
+    
     const target = event.target;
-    let result;
+    // target.setAttribute("style","background-color: green");
+    const compChoice = getComputerChoice();
 
-    switch(target.id) {
-        case 'rock':
-            console.log('You chose rock');
-            result = evaluateRound('rock', compChoice)
-        break;
-        case 'paper':
-            console.log('You chose paper');
-            result = evaluateRound('paper', compChoice)
-        break;
-        case 'scissors':
-            console.log('You chose scissors');
-            result = evaluateRound('scissors', compChoice)
-        break;
-    }
+    buttons.forEach((button) => {
+        if(button.id == target.id) {
+            button.setAttribute("style","background-color: green");
+        } else if(button.id == compChoice) {
+            button.setAttribute("style","background-color: red");
+        }
+        else {
+            button.setAttribute("style","background-color: aquamarine");
+        }
+    })
+
+    let result = evaluateRound(target.id, compChoice);
 
     // Update score
     switch(result) {
@@ -61,60 +58,6 @@ btnContainer.addEventListener('click', (event) => {
     }
 
 });
-
-// game();
-
-/**
- * Plays 5 rounds of Rock, Paper, Scissors. For each round, the player enters their
- * choices in the console. The opponent's choice is randomly generated. Each round's
- * results and the overall results are printed to the console.
- */
-function game() {
-    console.log(`Welcome to Rock Paper Scissors! The winner is determined from a Best-of-5 format.`);
-    
-    try {
-        let score = 0;
-        for(i = 0; i < 5; i++) {
-            let playerChoice;
-            // Marks start of round
-            while(true) {
-                playerChoice = prompt("Choose your weapon: ").toLowerCase();
-                if(!validInput.includes(playerChoice)) {
-                    console.log("Invalid choice: please pick from [rock, paper, scissors].");
-                    continue;
-                } else {
-                    console.log(`ROUND ${i+1}: You picked ${playerChoice}`);
-                    
-                    const compChoice = getComputerChoice();
-                    let result = evaluateRound(playerChoice, compChoice);
-                    // Tie detected, start the round over
-                    if(result == 0) { continue; }
-                    else if(result == 1) { score++ }
-                    else { score--; }
-                }
-                break;
-            }
-            // Best-of-5 determined early
-            if(score == 3) {
-                console.log(`WINNER!!! You won in ${i+1} rounds.`);
-                return;
-            } else if(score == -3) {
-                console.log(`LOSER!!! You lost in ${i+1} rounds.`);
-                return;
-            }
-        }
-    
-        // Evaluate the game
-        if(score > 0) {
-            console.log(`WINNER!!! You won in 5 rounds.`);
-        } else if(score < 0) {
-            console.log(`LOSER!!! You lost in 5 rounds.`);
-        }
-    } catch(error) {
-        console.error(error);
-    }
-    
-}
 
 /**
  * Determines the winner of a Rock-Paper-Scissors rounds given
@@ -162,15 +105,6 @@ function evaluateRound(playerSelection, computerSelection) {
         default:
             // do nothing
     }
-    if(result === undefined) { 
-        throw new Error("Unexpected error."); 
-    } else if(result > 0) {
-        console.log(`Round won; ${playerSelection} beats ${computerSelection}!`);
-    } else if(result < 0) {
-        console.log(`Round lost; ${computerSelection} beats ${playerSelection}...`);
-    } else {
-        console.log("It's a tie! Try again.");
-    }
     
     return result;
 }
@@ -187,6 +121,17 @@ function getComputerChoice() {
     else return "scissors";
 }
 
+/**
+ * Display new game info based on the state of the game by
+ * creating and adding text elements to the provided text container
+ * @param {Node} gameText The <div> containing the game text elements
+ * @param {object} roundData Information from the most recent round
+ * @param {string} roundData.playerChoice The player's last move
+ * @param {string} roundData.opponentChoice The computer opponent's last move
+ * @param {integer} roundData.result The round's result as provided by evaluateRound
+ * @param {integer} playerScore The player's current score
+ * @param {integer} opponentScore The computer opponent's score
+ */
 function updateGameText(gameText, roundData, playerScore, opponentScore) {
     removeAllChildNodes(gameText);
 
@@ -222,7 +167,7 @@ function updateGameText(gameText, roundData, playerScore, opponentScore) {
 
 /**
  * Helper function used to clear game text
- * @param {Node} parent
+ * @param {Node} parent Node containing the children to remove
  */
 function removeAllChildNodes(parent) {
     while(parent.firstChild) {
